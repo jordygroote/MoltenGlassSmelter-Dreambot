@@ -19,8 +19,8 @@ public class main extends AbstractScript {
     Area BankArea = new Area(3098, 3494,3095,3497,0);
     Area FurnaceArea = new Area(3109,3497,3107,3501,0);
 
-    private int BucketOfSand = 1783;
-    private int SodaAsh = 1781;
+    private final int BucketOfSand = 1783;
+    private final int SodaAsh = 1781;
 
 
 //    STATE
@@ -28,7 +28,6 @@ public class main extends AbstractScript {
 
     @Override
     public void onStart() {
-        super.onStart();
         log("Welcome to MoltenGlassSmelter 1.0");
         state = 0;
     }
@@ -60,19 +59,29 @@ public class main extends AbstractScript {
                     log("Sleep untill bank is open.");
                     if(sleepUntil(()-> getBank().open(),9000)) {
                         log("Withdrawing bucket of sand.");
-                        getBank().withdraw(BucketOfSand, 14);
-                        sleep(Calculations.random(1000,2500));
-                        getBank().withdraw(SodaAsh, 14);
-                        sleep(Calculations.random(1000, 2000));
-                        getBank().close();
-                        state = 1;
+//                        getBank().withdraw(BucketOfSand, 14);
+//                        sleep(Calculations.random(1000,2500));
+//                        getBank().withdraw(SodaAsh, 14);
+//                        sleep(Calculations.random(1000, 2000));
+//                        getBank().close();
+//                        state = 1;
+                        if(getBank().withdraw(BucketOfSand, 14)){
+                            if(sleepUntil(() -> getInventory().contains("Bucket of sand"), 2500)){
+                                if(getBank().withdraw(SodaAsh, 14)){
+                                    if(sleepUntil(() -> getInventory().contains("Soda ash"), 2500)){
+                                        getBank().close();
+                                        state = 1;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
             } else {
                 log("Not inside BankArea, walking to bank.");
                 if (getWalking().walk(BankArea.getCenter())) {
-                    sleep(Calculations.random(3000,5000));
+                    sleepUntil(() -> getLocalPlayer().distance(BankArea.getCenter()) < Calculations.random(2, 4), 7000);
                 }
             }
         } else {
@@ -85,7 +94,6 @@ public class main extends AbstractScript {
         if(getInventory().contains(BucketOfSand)){
             if(FurnaceArea.contains(getLocalPlayer())){
                 GameObject Furnace = getGameObjects().closest("Furnace");
-
                 if (Furnace != null) {
                     getInventory().get(BucketOfSand).useOn(Furnace);
                     sleep(2000);
@@ -123,7 +131,7 @@ public class main extends AbstractScript {
                 if(sleepUntil(()-> getBank().open(),9000)) {
                     log("Deposite everything");
                     if(getBank().depositAllItems()){
-                        if (sleepUntil(()-> !getInventory().isFull(),8000)){
+                        if (sleepUntil(()-> !getInventory().isFull(),4000)){
                             state = 0;
                         }
                     }
@@ -141,7 +149,7 @@ public class main extends AbstractScript {
 
     @Override
     public void onExit() {
-        super.onExit();
+
     }
 
 
